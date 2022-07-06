@@ -100,3 +100,12 @@ Reinicie o Raspberry
 ```
 sudo reboot
 ```
+
+## Python
+
+Python 3.7.3
+
+Instale a biblioteca [gpsd-py3](https://github.com/MartijnBraam/gpsd-py3)
+```sh
+$ pip3 install gpsd-py3
+```
