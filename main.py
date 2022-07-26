@@ -1,29 +1,64 @@
 import gpsd
 import requests
 import os
+import datetime
+
+from hermesDB import hermesDB
 
 API_URL = os.getenv('HERMES_LOGGER_URL')
 
 def main():
+    # Conecta ao socket do GPSD
     gpsd.connect()
-
     pos = gpsd.get_current()
 
-    if pos.mode >= 2:
+    # Abre a conexão com banco
+    db = hermesDB()
+    
+    # Coleta os dados
+    time = str(datetime.datetime.now().replace(microsecond=0))
+    mode = pos.mode
+    sats = pos.sats
 
-        time = pos.get_time()
+    lat = lon = alt = climb = hspeed = track = sat_time = None
 
-        data = {
-            'timestamp': f'{time.year}-{time.month}-{time.day} {time.hour}:{time.minute}:{time.second}',
-            'longitude': pos.lon,
-            'latitude': pos.lat
-        }
+    error=None
 
-        response = requests.post(API_URL, json=data)
-        print(response.json())
+    if mode >= 2:
+        lat      = pos.lat
+        lon      = pos.lon
+        hspeed   = pos.hspeed
+        track    = pos.track
+        sat_time = pos.get_time(local_time=True)
+        error    = str(pos.error)
+
+    if mode >= 3:
+        alt   = pos.alt
+        climb = pos.climb
         
+    print(f'Modo: {mode}')
+
+    db.inserir_posicao(
+        time = time,
+        mode = mode,
+        sats = sats,
+        lat  = lat,
+        lon  = lon,
+        alt  = alt,
+        hspeed = hspeed,
+        track  = track,
+        climb  = climb,
+        sat_time = sat_time,
+        error    = error
+    )
+
+    db.cursor.execute("""
+        SELECT * FROM tgpslog
+    """)
+
+    for linha in db.cursor.fetchall():
+        print(linha)
+    
+
 if __name__ == "__main__":
-    try:
-        main()
-    except:
-        pass
+    main()

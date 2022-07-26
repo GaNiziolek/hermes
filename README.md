@@ -109,3 +109,21 @@ Instale a biblioteca [gpsd-py3](https://github.com/MartijnBraam/gpsd-py3)
 ```sh
 $ pip3 install gpsd-py3
 ```
+
+## Configuração GPRS
+
+Precisamos ativar novos pinos  para utiulizar outra interface UART (serial) na placa.
+
+Para isso acesse o arquivo ```/boot/config.txt``` e adicione as seguintes linhas no final
+
+```sh
+sudo nano /boot/config.txt
+```
+
+
+```sh
+# Ativar UART 5 nos pinos:
+# GPIO13 = RXD
+# GPIO12 = TXD
+dtoverlay=uart5
+```
